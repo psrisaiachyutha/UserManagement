@@ -1,6 +1,8 @@
-﻿using Common.Models.Requests;
+﻿#region References
+using Common.Models.Requests;
 using Common.Constants;
 using FluentValidation;
+#endregion References
 
 namespace UserManagementService.Validators
 {
@@ -14,7 +16,6 @@ namespace UserManagementService.Validators
             RuleFor(x => x.Password).Matches(Constants.PasswordRegexPattern)
                 .WithMessage(ErrorMessages.PasswordRegexErrorMessage);
             RuleFor(x => x.Password).NotEmpty();
-
         }
     }
 }

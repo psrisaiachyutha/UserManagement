@@ -1,19 +1,41 @@
 ﻿using Repository.Models.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Repository.Interfaces
 {
     public interface IRoleRepository
     {
+        /// <summary>
+        /// Fetches all roles from database
+        /// </summary>
+        /// <returns></returns>
         public Task<IEnumerable<Role>> GetAllRolesAsync();
-        public Task<Role> GetRoleByNameAsync(string roleName);
-        public Task<Role> CreateRoleAsync(string roleName);
-        public Task<Role> GetRoleByIdAsync(int roleId);
-        public Task<bool> DeleteRoleAsync(Role role);
 
+        /// <summary>
+        /// Gets role based on name
+        /// </summary>
+        /// <param name="roleName"></param>
+        /// <returns></returns>
+        public Task<Role> GetRoleByNameAsync(string roleName);
+
+        /// <summary>
+        /// Creates a new Role record in the database
+        /// </summary>
+        /// <param name="roleName"></param>
+        /// <returns></returns>
+        public Task<Role> CreateRoleAsync(string roleName);
+
+        /// <summary>
+        /// Gets role based on the id 
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        public Task<Role> GetRoleByIdAsync(int roleId);
+        
+        /// <summary>
+        /// Deletes the role from database
+        /// </summary>
+        /// <param name="role"></param>
+        /// <returns></returns>
+        public Task<bool> DeleteRoleAsync(Role role);
     }
 }

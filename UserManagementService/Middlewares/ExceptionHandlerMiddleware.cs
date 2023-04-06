@@ -1,7 +1,9 @@
-﻿using Common.Exceptions;
+﻿#region References
+using Common.Exceptions;
 using Common.Models;
 using System.Net;
 using System.Text.Json;
+#endregion References
 
 namespace UserManagementService.Middlewares
 {

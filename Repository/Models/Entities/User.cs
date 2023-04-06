@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Text.Json.Serialization;
 
 namespace Repository.Models.Entities
 {
@@ -7,15 +7,15 @@ namespace Repository.Models.Entities
         public User()
         {
             this.UserRoles = new HashSet<UserRole>();
-            //this.Roles = new HashSet<Role>();
         }
         
         public int UserId { get; set; }
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
-        public string PasswordHash { get; set; } = null!;        
-        //public virtual ICollection<Role> Roles { get; set; }
+        
+        [JsonIgnore]
+        public string PasswordHash { get; set; } = null!;                
         public virtual ICollection<UserRole> UserRoles { get; set; }
     }
 }

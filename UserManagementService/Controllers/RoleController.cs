@@ -2,6 +2,7 @@
 using Business.Interfaces;
 using Common.Constants;
 using Common.Exceptions;
+using Common.ExtensionMethods;
 using Common.Models;
 using Common.Models.Requests;
 using Common.Models.Responses;
@@ -90,7 +91,8 @@ namespace UserManagementService.Controllers
         public async Task<ApiResponseObject<RoleResponseDTO>> CreateRole(
             [FromBody] CreateRoleRequestDTO createRoleRequestDTO)
         {
-            _logger.LogInformation("{functionName} api is triggered with request body : {request}", nameof(CreateRole), createRoleRequestDTO);
+            _logger.LogInformation("{functionName} api is triggered with request body : {request}", 
+                nameof(CreateRole), createRoleRequestDTO.JsonSerialize());
             
             ValidationResult validationResult = await _createRoleRequestDTOValidator.ValidateAsync(createRoleRequestDTO);
             if (!validationResult.IsValid)

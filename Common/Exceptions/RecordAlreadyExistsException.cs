@@ -7,6 +7,5 @@
         public RecordAlreadyExistsException(string message) : base(message) { }
 
         public RecordAlreadyExistsException(string message, Exception inner) : base(message, inner) { }
-
     }
 }

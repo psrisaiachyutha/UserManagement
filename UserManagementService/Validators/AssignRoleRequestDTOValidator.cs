@@ -1,5 +1,7 @@
-﻿using Common.Models.Requests;
+﻿#region References
+using Common.Models.Requests;
 using FluentValidation;
+#endregion References
 
 namespace UserManagementService.Validators
 {

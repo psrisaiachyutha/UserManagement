@@ -1,19 +1,11 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Net;
 
 namespace Common.Models
 {
     public class ApiResponseObject<T>
-    {
-        [DataMember()]
-        public bool? Success { get; set; }
+    {        
+        public HttpStatusCode StatusCode { get; set; }
 
-
-        [DataMember()]
-        public string Message { get; set; }
-
-
-        [DataMember()]
         public T Data { get; set; }
-
     }
 }

@@ -1,19 +1,36 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿#region References
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Repository.Interfaces;
 using Repository.Models.Entities;
+#endregion References
 
 namespace Repository.Implementations
 {
-
+    /// <summary>
+    /// UserRepository to handle entity User
+    /// </summary>
     public class UserRepository : IUserRepository
     {
+        #region References
         private readonly ApplicationDbContext _dbContext;
+        private readonly ILogger<UserRepository> _logger;
+        #endregion References
 
-        public UserRepository(ApplicationDbContext dbContext)
+        /// <summary>
+        /// UserRepository constructor is created with its dependents
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="dbContext"></param>
+        public UserRepository(
+            ILogger<UserRepository> logger,
+            ApplicationDbContext dbContext)
         {
+            _logger = logger;
             _dbContext = dbContext;
         }
 
+        /// <inheritdoc/>
         public async Task<User> GetUserByEmailAsync(string email)
         {
             return await _dbContext.Users
@@ -21,6 +38,7 @@ namespace Repository.Implementations
                 .ThenInclude(u => u.Role).SingleOrDefaultAsync(user => user.Email == email);
         }
 
+        /// <inheritdoc/>
         public async Task<User> CreateUserAsync(User user)
         {
             await _dbContext.Users.AddAsync(user);
@@ -29,6 +47,7 @@ namespace Repository.Implementations
             return user;
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             return await _dbContext.Users
@@ -36,12 +55,14 @@ namespace Repository.Implementations
                 .ThenInclude(u => u.Role).ToListAsync();
         }
 
+        /// <inheritdoc/>
         public async Task<User> GetUserByIdAsync(int id)
         {
             return await _dbContext.Users
                 .Include(u => u.UserRoles).SingleOrDefaultAsync(user => user.UserId == id);
         }
 
+        /// <inheritdoc/>
         public async Task<UserRole> AssignRoleAsync(int userId, int roleId)
         {
             UserRole userRole = new(){ RoleId = roleId, UserId = userId };
@@ -51,6 +72,7 @@ namespace Repository.Implementations
             return userRole;
         }
 
+        /// <inheritdoc/>
         public async Task<bool> DeleteAllUserRoles(int userId)
         {
             var userRoles = await _dbContext.UserRoles.Where(ur => ur.UserId == userId).ToListAsync();

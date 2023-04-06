@@ -1,7 +1,9 @@
-﻿using AutoMapper;
+﻿#region References
+using AutoMapper;
 using Common.Models.Requests;
 using Common.Models.Responses;
 using Repository.Models.Entities;
+#endregion References
 
 namespace Business.Mappers
 {

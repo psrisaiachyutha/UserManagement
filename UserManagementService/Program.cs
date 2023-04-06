@@ -19,15 +19,12 @@ using Repository.Implementations;
 using UserManagementService.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
-//var mapperConfig = new MapperConfiguration(mc => {
-//    mc.AddProfile(new UserProfile());
-//});
-
 
 builder.Services.AddControllers()
 .AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
 
 // Api versioning

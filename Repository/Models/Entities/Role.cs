@@ -4,13 +4,12 @@
     {
         public Role()
         {
-            //Users = new HashSet<User>();
+            this.UserRoles = new HashSet<UserRole>();
         }
         
         public int RoleId { get; set; }
         public string Name { get; set; }
         
-        //public virtual ICollection<User> Users { get; set; }
         public  ICollection<UserRole> UserRoles { get; set; }
     }
 }
