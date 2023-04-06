@@ -16,6 +16,7 @@ using Business.Interfaces;
 using Business.Implementations;
 using Repository.Interfaces;
 using Repository.Implementations;
+using UserManagementService.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 //var mapperConfig = new MapperConfiguration(mc => {
@@ -67,6 +68,11 @@ builder.Services.AddSwaggerGen(c => {
             Array.Empty<string>()
         }
     });
+
+     
+    //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    //c.IncludeXmlComments(xmlPath);
 });
 
 // Adding database
@@ -98,10 +104,14 @@ builder.Services.AddAuthentication(options =>
 
     builder.Services.AddScoped<IUserBusinessHandler, UserBusinessHandler>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+    builder.Services.AddScoped<IRoleBusinessHandler, RoleBusinessHandler>();
 
     // Adding validators
     builder.Services.AddScoped<IValidator<LoginRequestDTO>, LoginRequestDTOValidator>();
     builder.Services.AddScoped<IValidator<CreateUserRequestDTO>, CreateUserRequestDTOValidator>();
+    builder.Services.AddScoped<IValidator<AssignRoleRequestDTO>, AssignRoleRequestDTOValidator>();
+    builder.Services.AddScoped<IValidator<CreateRoleRequestDTO>, CreateRoleRequestDTOValidator>();
 
     // Adding automapper
     builder.Services.AddSingleton(new MapperConfiguration(mc => {
@@ -117,6 +127,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// global error handler
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 

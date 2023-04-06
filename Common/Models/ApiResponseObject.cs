@@ -2,7 +2,7 @@
 
 namespace Common.Models
 {
-    public class GenericResponseObject<T>
+    public class ApiResponseObject<T>
     {
         [DataMember()]
         public bool? Success { get; set; }

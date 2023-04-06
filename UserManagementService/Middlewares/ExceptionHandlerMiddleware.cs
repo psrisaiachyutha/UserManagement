@@ -1,4 +1,5 @@
 ﻿using Common.Exceptions;
+using Common.Models;
 using System.Net;
 using System.Text.Json;
 
@@ -47,13 +48,7 @@ namespace UserManagementService.Middlewares
                     _ => (int)HttpStatusCode.InternalServerError,// unhandled error
                 };
 
-                var result = JsonSerializer.Serialize(new
-                {
-                    Error = new
-                    {
-                        Message = error?.Message ?? "Oops! Something happend"
-                    }
-                });
+                var result = JsonSerializer.Serialize(new ApiErrorObject { ErrorMessage = error?.Message });
 
                 await response.WriteAsync(result);
             }

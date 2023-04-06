@@ -11,7 +11,12 @@ namespace Business.Mappers
         {
             CreateMap<CreateUserRequestDTO, User>();
 
-            CreateMap<User, UserResponseDTO>();
+            CreateMap<User, UserResponseDTO>()
+                .ForMember(x => x.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(x => x.Role)));
+
+            CreateMap<AssignRoleRequestDTO, AssignRoleResponseDTO>().ReverseMap();
+            
+            CreateMap<RoleResponseDTO, Role>().ReverseMap();
         }
     }
 }
