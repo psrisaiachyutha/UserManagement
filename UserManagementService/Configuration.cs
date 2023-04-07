@@ -30,6 +30,7 @@ namespace UserManagementService
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IRoleBusinessHandler, RoleBusinessHandler>();
+            services.AddScoped<IJWTHelper, JWTHelper>();
 
             // Adding validators
             services.AddScoped<IValidator<LoginRequestDTO>, LoginRequestDTOValidator>();

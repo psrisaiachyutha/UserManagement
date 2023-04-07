@@ -1,21 +1,14 @@
 ﻿#region References
 using AutoMapper;
 using Business.Interfaces;
-using Common.Configurations;
 using Common.Constants;
 using Common.Exceptions;
 using Common.ExtensionMethods;
 using Common.Models.Requests;
 using Common.Models.Responses;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Repository.Interfaces;
 using Repository.Models.Entities;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 #endregion References
 
 namespace Business.Implementations
@@ -27,7 +20,8 @@ namespace Business.Implementations
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IMapper _mapper;
-        private readonly ApplicationSettings _applicationSettings;
+        private readonly IJWTHelper _jWTHelper;
+        ///private readonly ApplicationSettings _applicationSettings;
         #endregion Delcarations
 
         #region Constructor
@@ -39,18 +33,21 @@ namespace Business.Implementations
         /// <param name="userRepository"></param>
         /// <param name="roleRepository"></param>
         /// <param name="applicationSettings"></param>
+        /// <param name="jWTHelper"></param>
         public UserBusinessHandler(
             ILogger<UserBusinessHandler> logger,
             IMapper mapper,
             IUserRepository userRepository,
             IRoleRepository roleRepository,
-            IOptions<ApplicationSettings> applicationSettings)
+            IJWTHelper jWTHelper)
+            //IOptions<ApplicationSettings> applicationSettings)
         {
             _logger = logger;
             _mapper = mapper;
             _userRepository = userRepository;
-            _applicationSettings = applicationSettings.Value;
+            //_applicationSettings = applicationSettings.Value;
             _roleRepository = roleRepository;
+            _jWTHelper = jWTHelper;
         }
         #endregion Constructor
 
@@ -76,13 +73,13 @@ namespace Business.Implementations
 
             _logger.LogInformation("user fetched from database, user record is {user}", user.JsonSerialize());
 
-            if (!VerifyPasswordHash(loginRequest.Password, user.PasswordHash))
+            if (!_jWTHelper.VerifyPasswordHash(loginRequest.Password, user.PasswordHash))
             {
                 _logger.LogError("User credentials passed or wrong for email: {email}", loginRequest.Email);
                 throw new InvalidCredentialsException(ErrorMessages.EmailOrPasswordIncorrect);
             }
 
-            return new TokenResponseDTO { AccessToken = GenerateJwtToken(user) };
+            return new TokenResponseDTO { AccessToken = _jWTHelper.GenerateJwtToken(user) };
 
         }
 
@@ -105,7 +102,7 @@ namespace Business.Implementations
             }
 
             User userToBeCreated = _mapper.Map<User>(createUserRequestDTO);
-            userToBeCreated.PasswordHash = CreatePasswordHash(createUserRequestDTO.Password);
+            userToBeCreated.PasswordHash = _jWTHelper.CreatePasswordHash(createUserRequestDTO.Password);
 
             var createdUser = await _userRepository.CreateUserAsync(userToBeCreated);
             _logger.LogInformation("User created successfully");
@@ -193,55 +190,5 @@ namespace Business.Implementations
             return await _userRepository.DeleteAllUserRoles(userId);
         }
         #endregion Public Methods
-
-        #region Private methods
-        private string GenerateJwtToken(User user)
-        {
-            
-            List<Claim> claims = new() 
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new Claim(ClaimTypes.Email, user.Email),  
-            };
-            if (user.UserRoles.Any())
-            {
-                // Adding claims based on the roles the user having
-                var userRoleClaims = user.UserRoles.Select(x => new Claim(ClaimTypes.Role, x.Role.Name)).ToList();
-
-                claims.AddRange(userRoleClaims);
-            }
-            
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_applicationSettings.SignatureKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(5),
-                SigningCredentials = creds
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return tokenHandler.WriteToken(token);
-        }
-
-        private string CreatePasswordHash(string password)
-        {
-            using var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(_applicationSettings.PasswordEncriptionKey));
-            var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(hash);
-        }
-
-        private bool VerifyPasswordHash(string password, string hash)
-        {
-            using var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(_applicationSettings.PasswordEncriptionKey));
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return computedHash.SequenceEqual(Convert.FromBase64String(hash));
-        }
-        #endregion Private methods
     }
 }

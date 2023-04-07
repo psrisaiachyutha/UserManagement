@@ -2,6 +2,7 @@
 using AutoMapper;
 using Business.Implementations;
 using Business.Interfaces;
+using Business.Mappers;
 using Common.Configurations;
 using Common.Exceptions;
 using Common.Models.Requests;
@@ -21,67 +22,130 @@ using System.Threading.Tasks;
 
 namespace Business.Tests
 {
+    [TestFixture]
     public class UserBusinessHandlerTests
     {
-        private readonly Mock<ILogger<UserBusinessHandler>> _loggerMock;
-        private readonly Mock<IUserRepository> _userRepositoryMock;
-        private readonly Mock<IRoleRepository> _roleRepositoryMock;
-        private readonly Mock<IMapper> _mapperMock;
-        private readonly Mock<IOptions<ApplicationSettings>> _optionsMock;
-        private readonly UserBusinessHandler _userBusinessHandler;
+        private Mock<ILogger<UserBusinessHandler>> _loggerMock;
+        private Mock<IUserRepository> _userRepositoryMock;
+        private Mock<IRoleRepository> _roleRepositoryMock;
+        private Mock<IMapper> _mapperMock;
+        private Mock<IJWTHelper> _jwthelperMock;
+        private UserBusinessHandler _userBusinessHandler;
 
-        public UserBusinessHandlerTests()
+        [SetUp]
+        public void SetUp()
         {
             _loggerMock = new Mock<ILogger<UserBusinessHandler>>();
             _userRepositoryMock = new Mock<IUserRepository>();
             _roleRepositoryMock = new Mock<IRoleRepository>();
             _mapperMock = new Mock<IMapper>();
-            _optionsMock = new Mock<IOptions<ApplicationSettings>>();
-            _userBusinessHandler = new UserBusinessHandler(_loggerMock.Object, _mapperMock.Object, _userRepositoryMock.Object, _roleRepositoryMock.Object, _optionsMock.Object);
+            _jwthelperMock = new Mock<IJWTHelper>();
+            _userBusinessHandler = new UserBusinessHandler(
+                _loggerMock.Object,
+                _mapperMock.Object,
+                _userRepositoryMock.Object,
+                _roleRepositoryMock.Object,
+                _jwthelperMock.Object);
         }
 
-        [Ignore("need to move the code")]
         [Test]
         public async Task VerifyLoginAsync_ValidCredentials_ReturnsTokenResponseDTO()
         {
-            /*
             // Arrange
-            var loginRequestDTO = new LoginRequestDTO { Email = "test@test.com", Password = "password123" };
-            var user = new User { Email = loginRequestDTO.Email, PasswordHash = _userBusinessHandler.CreatePasswordHash(loginRequestDTO.Password) };
-            _userRepositoryMock.Setup(x => x.GetUserByEmailAsync(loginRequestDTO.Email)).ReturnsAsync(user);
-            var tokenResponseDTO = new TokenResponseDTO { AccessToken = "accessToken" };
-            _mapperMock.Setup(x => x.Map<TokenResponseDTO>(It.IsAny<object>())).Returns(tokenResponseDTO);
+            var email = "john@example.com";
+            var password = "mypassword";
+            var loginRequest = new LoginRequestDTO { Email = email, Password = password };
+            var user = new User { Email = email, PasswordHash = "passwordhash", FirstName = "John", LastName = "Doe", };
+            _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(user);
+            _jwthelperMock.Setup(jwt => jwt.VerifyPasswordHash(password, user.PasswordHash)).Returns(true);
 
             // Act
-            var result = await _userBusinessHandler.VerifyLoginAsync(loginRequestDTO);
+            var result = await _userBusinessHandler.VerifyLoginAsync(loginRequest);
 
             // Assert
-            Assert.AreEqual(tokenResponseDTO, result);
-            */
+            Assert.IsInstanceOf<TokenResponseDTO>(result);
+            Assert.IsNotEmpty(result.AccessToken);
         }
 
         [Test]
         public void VerifyLoginAsync_UserNotFound_ThrowsRecordNotFoundException()
         {
             // Arrange
-            var loginRequestDTO = new LoginRequestDTO { Email = "test@test.com", Password = "password123" };
-            _userRepositoryMock.Setup(x => x.GetUserByEmailAsync(loginRequestDTO.Email)).ReturnsAsync((User)null);
+            var email = "john@example.com";
+            var password = "mypassword";
+            var loginRequest = new LoginRequestDTO { Email = email, Password = password };
+            _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(null as User);
 
-            // Act + Assert
-            Assert.ThrowsAsync<RecordNotFoundException>(() => _userBusinessHandler.VerifyLoginAsync(loginRequestDTO));
+            // Act & Assert
+            Assert.ThrowsAsync<RecordNotFoundException>(() => _userBusinessHandler.VerifyLoginAsync(loginRequest));
         }
 
-        [Ignore("need to move the code")]
         [Test]
-        public void VerifyLoginAsync_InvalidCredentials_ThrowsInvalidCredentialsException()
+        public void VerifyLoginAsync_InvalidPassword_ThrowsInvalidCredentialsException()
         {
             // Arrange
-            var loginRequestDTO = new LoginRequestDTO { Email = "test@test.com", Password = "password123" };
-            var user = new User { Email = loginRequestDTO.Email, PasswordHash = "wrongPasswordHash" };
-            _userRepositoryMock.Setup(x => x.GetUserByEmailAsync(loginRequestDTO.Email)).ReturnsAsync(user);
+            var email = "john@example.com";
+            var password = "mypassword";
+            var loginRequest = new LoginRequestDTO { Email = email, Password = password };
+            var user = new User { Email = email, PasswordHash = "passwordhash", FirstName = "John", LastName = "Doe", };
+            _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(user);
+            _jwthelperMock.Setup(jwt => jwt.VerifyPasswordHash(password, user.PasswordHash)).Returns(false);
 
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidCredentialsException>(() => _userBusinessHandler.VerifyLoginAsync(loginRequest));
+        }
+
+        [Test]
+        public void RegisterUserAsync_ShouldThrowRecordAlreadyExistsException_WhenUserAlreadyExists()
+        {
+            // Arrange
+            var createUserRequestDTO = new CreateUserRequestDTO
+            {
+                Email = "testemail@example.com",
+                Password = "testpassword",
+                FirstName = "John",
+                LastName = "Doe"
+            };
+            var existingUser = new User {
+                Email = "testemail@example.com",
+                PasswordHash = "testpassword",
+                FirstName = "John",
+                LastName = "Doe"
+            };
+
+            _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync(createUserRequestDTO.Email))
+                .ReturnsAsync(existingUser);
+
+            
             // Act + Assert
-            Assert.ThrowsAsync<InvalidCredentialsException>(() => _userBusinessHandler.VerifyLoginAsync(loginRequestDTO));
+            var ex = Assert.ThrowsAsync<RecordAlreadyExistsException>(
+                async () => await _userBusinessHandler.RegisterUserAsync(createUserRequestDTO));
+            Assert.AreEqual("User with email: testemail@example.com already exists",ex.Message);
+        }
+
+        [Test]
+        public async Task GetAllUsersAsync_ReturnsEmptyCollection_WhenNoUsersFound()
+        {
+            // Arrange
+            _userRepositoryMock.Setup(repo => repo.GetAllUsersAsync())
+                                .ReturnsAsync(new List<User>());
+            
+            // Act
+            var result = await _userBusinessHandler.GetAllUsersAsync();
+
+            // Assert
+            Assert.IsEmpty(result);
+        }
+
+        [Test]
+        public void GetAllUsersAsync_ThrowsException_WhenRepositoryThrowsException()
+        {
+            // Arrange
+            _userRepositoryMock.Setup(repo => repo.GetAllUsersAsync())
+                                .ThrowsAsync(new Exception("Database connection failed"));
+            
+            // Act & Assert
+            Assert.ThrowsAsync<Exception>(() => _userBusinessHandler.GetAllUsersAsync());
         }
     }
 }
