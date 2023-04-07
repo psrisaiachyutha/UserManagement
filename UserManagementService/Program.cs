@@ -29,7 +29,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddCustomSwaggerGeneration();
 
 // Adding database
-builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("UserManagementDatabase"));
+builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseSqlite(builder.Configuration.GetConnectionString("WebApiDatabase")));
 
 builder.Services.AddCustomAuthentication(builder.Configuration);
 
