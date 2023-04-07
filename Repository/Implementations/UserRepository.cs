@@ -41,10 +41,18 @@ namespace Repository.Implementations
         /// <inheritdoc/>
         public async Task<User> CreateUserAsync(User user)
         {
-            await _dbContext.Users.AddAsync(user);
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                await _dbContext.Users.AddAsync(user);
+                await _dbContext.SaveChangesAsync();
 
-            return user;
+                return user;
+            }
+            catch (InvalidOperationException ex )
+            {
+                throw ex;
+            }
+            
         }
 
         /// <inheritdoc/>
