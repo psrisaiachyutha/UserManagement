@@ -22,7 +22,6 @@ namespace UserManagementService.Controllers
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/role")]
     [Produces(MediaTypeNames.Application.Json)]
-    [Consumes(MediaTypeNames.Application.Json)]
     public class RoleController : ControllerBase
     {
         #region Declarations
@@ -88,6 +87,7 @@ namespace UserManagementService.Controllers
         [ProducesResponseType(typeof(ApiErrorObject), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiErrorObject), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiErrorObject), StatusCodes.Status500InternalServerError)]
+        [Consumes(MediaTypeNames.Application.Json)]
         public async Task<ApiResponseObject<RoleResponseDTO>> CreateRole(
             [FromBody] CreateRoleRequestDTO createRoleRequestDTO)
         {
@@ -110,28 +110,30 @@ namespace UserManagementService.Controllers
         }
 
         /// <summary>
-        /// Api to delete all roles of a user
+        /// Api to delete a role in database
         /// </summary>
         /// <param name="roleId"></param>
         /// <returns>boolean value whether data is deleted or not</returns>
-        [HttpDelete("{roleId:int}", Name = nameof(DeleteAllRolesForUser))]
+        /// <response code="200">If the role object is found and deleted successfully</response>
+        /// <response code="404">If request object is not found in database</response>
+        /// <response code="403">If the user is unauthorized</response>
+        /// <response code="500">If any internal server error due to the database or any other issue</response>
+        [HttpDelete("{roleId:int}", Name = nameof(DeleteRoleById))]
         [ProducesResponseType(typeof(ApiResponseObject<IEnumerable<RoleResponseDTO>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiErrorObject), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiErrorObject), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiErrorObject), StatusCodes.Status500InternalServerError)]
-        public async Task<ApiResponseObject<bool>> DeleteAllRolesForUser(int roleId)
+        public async Task<ApiResponseObject<bool>> DeleteRoleById(int roleId)
         {
-            _logger.LogInformation("{functionName} api is triggered.", nameof(DeleteAllRolesForUser));
+            _logger.LogInformation("{functionName} api is triggered.", nameof(DeleteRoleById));
 
             var result = await _roleBusinessHandler.DeleteRoleByIdAsync(roleId);
 
-            _logger.LogInformation("Roles for the user got deleted successfully");
+            _logger.LogInformation("Required role is successfully deleted.");
 
             return new ApiResponseObject<bool> { Data = result };
         }
 
-        #endregion Public Methods
-        // TODO HTTP STATUS CODE PROPERLY UPDATE
-        // TODO authorization also properly 
-        // TODO LOGGING
+        #endregion Public Methods   
     }
 }

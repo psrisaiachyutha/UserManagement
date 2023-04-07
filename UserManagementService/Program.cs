@@ -31,28 +31,6 @@ builder.Services.AddCustomSwaggerGeneration();
 // Adding database
 builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("UserManagementDatabase"));
 
-/*
-// Adding authentication with Jwt bearer
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["ApplicationSettings:SignatureKey"])),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ClockSkew = TimeSpan.Zero
-    };
-});
-*/
-
 builder.Services.AddCustomAuthentication(builder.Configuration);
 
 builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("ApplicationSettings"));

@@ -147,7 +147,7 @@ namespace Business.Implementations
             var role = await _roleRepository.GetRoleByNameAsync(assignRoleRequestDTO.RoleName);
             if (role is null)
             {
-                _logger.LogError("Role doesn't exists will role: {role}", role.Name);
+                _logger.LogError("Role doesn't exists will role: {role}", assignRoleRequestDTO.RoleName);
                 throw new RecordNotFoundException(ErrorMessages.RoleNotFound(assignRoleRequestDTO.RoleName));
             }
 
