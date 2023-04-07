@@ -1,6 +1,7 @@
 ﻿#region References
 using Business.Interfaces;
 using Common.Constants;
+using Common.Constants.Enums;
 using Common.Exceptions;
 using Common.ExtensionMethods;
 using Common.Models;
@@ -8,6 +9,7 @@ using Common.Models.Requests;
 using Common.Models.Responses;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 #endregion References
@@ -17,7 +19,7 @@ namespace UserManagementService.Controllers
     /// <summary>
     /// Role controller
     /// </summary>
-    //[Authorize(Roles = nameof(RolesEnum.Admin))]
+    [Authorize(Roles = nameof(RolesEnum.Admin))]
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/role")]

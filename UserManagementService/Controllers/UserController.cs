@@ -106,7 +106,6 @@ namespace UserManagementService.Controllers
         /// <response code="409">IF the user record already exists with the email</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="500">If any internal server error due to the database or any other issue</response>
-        [AllowAnonymous]
         [HttpPost("register", Name = nameof(CreateUser))]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ApiResponseObject<AssignRoleResponseDTO>), StatusCodes.Status201Created)]
@@ -142,8 +141,7 @@ namespace UserManagementService.Controllers
         [HttpGet("all", Name = nameof(GetAllUsers))]
         [ProducesResponseType(typeof(ApiResponseObject<IEnumerable<UserResponseDTO>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ApiErrorObject), StatusCodes.Status500InternalServerError)]
-        
+        [ProducesResponseType(typeof(ApiErrorObject), StatusCodes.Status500InternalServerError)]        
         public async Task<ApiResponseObject<IEnumerable<UserResponseDTO>>> GetAllUsers()
         {
             _logger.LogInformation("{functionName} api is triggered.", nameof(GetAllUsers));
@@ -165,8 +163,7 @@ namespace UserManagementService.Controllers
         /// <response code="400">If the requested payload is invalid</response>
         /// <response code="404">If user object is not found in database</response>
         /// <response code="401">If the user is unauthorized</response>
-        /// <response code="500">If any internal server error due to the database or any other issue</response>
-        [AllowAnonymous]
+        /// <response code="500">If any internal server error due to the database or any other issue</response>        
         [HttpPost("assignrole", Name = nameof(CreateRoleForUser))]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ApiResponseObject<AssignRoleResponseDTO>), StatusCodes.Status201Created)]
@@ -190,6 +187,7 @@ namespace UserManagementService.Controllers
             var result = await _userBusinessHandler.AssignRoleForUserAsync(assignRoleRequestDTO);
             _logger.LogInformation("Successfully assigned the role for the user");
 
+            Response.StatusCode = 201;
             return new ApiResponseObject<AssignRoleResponseDTO> { Data = result };
         }
 
@@ -202,7 +200,6 @@ namespace UserManagementService.Controllers
         /// <response code="404">If request object is not found in database</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="500">If any internal server error due to the database or any other issue</response>
-        [AllowAnonymous]
         [HttpDelete("{userId:int}/roles", Name = nameof(DeleteAllRolesForUser))]
         [ProducesResponseType(typeof(ApiResponseObject<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
