@@ -21,7 +21,6 @@ namespace Business.Implementations
         private readonly IRoleRepository _roleRepository;
         private readonly IMapper _mapper;
         private readonly IJWTHelper _jWTHelper;
-        ///private readonly ApplicationSettings _applicationSettings;
         #endregion Delcarations
 
         #region Constructor
@@ -32,7 +31,6 @@ namespace Business.Implementations
         /// <param name="mapper"></param>
         /// <param name="userRepository"></param>
         /// <param name="roleRepository"></param>
-        /// <param name="applicationSettings"></param>
         /// <param name="jWTHelper"></param>
         public UserBusinessHandler(
             ILogger<UserBusinessHandler> logger,
@@ -40,12 +38,10 @@ namespace Business.Implementations
             IUserRepository userRepository,
             IRoleRepository roleRepository,
             IJWTHelper jWTHelper)
-            //IOptions<ApplicationSettings> applicationSettings)
         {
             _logger = logger;
             _mapper = mapper;
             _userRepository = userRepository;
-            //_applicationSettings = applicationSettings.Value;
             _roleRepository = roleRepository;
             _jWTHelper = jWTHelper;
         }

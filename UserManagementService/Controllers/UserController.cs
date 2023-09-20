@@ -127,7 +127,7 @@ namespace UserManagementService.Controllers
             var result = await _userBusinessHandler.RegisterUserAsync(createUserRequestDTO);
             _logger.LogInformation("successfully created the user in database");
 
-            Response.StatusCode = 201;
+            Response.StatusCode = StatusCodes.Status201Created;
             return new ApiResponseObject<UserResponseDTO> { Data = result };
         }
 
@@ -187,7 +187,7 @@ namespace UserManagementService.Controllers
             var result = await _userBusinessHandler.AssignRoleForUserAsync(assignRoleRequestDTO);
             _logger.LogInformation("Successfully assigned the role for the user");
 
-            Response.StatusCode = 201;
+            Response.StatusCode = StatusCodes.Status201Created;
             return new ApiResponseObject<AssignRoleResponseDTO> { Data = result };
         }
 
