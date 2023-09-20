@@ -33,7 +33,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseSqlite(builder
 
 builder.Services.AddCustomAuthentication(builder.Configuration);
 
-builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("ApplicationSettings"));
+//builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("ApplicationSettings"));
+builder.Services.AddOptions<ApplicationSettings>()
+            .Bind(builder.Configuration.GetSection("ApplicationSettings"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
 builder.Services.AddMyDependencyGroup();
 
